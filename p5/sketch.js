@@ -48,7 +48,7 @@ function draw() {
 
   // Draw the circle
   fill(circleColor);
-  circle(260, 150, 100); // Centered circle with diameter 100
+  circle(100, 100, 50); // Centered circle with diameter 50
 
   // Change button label based on connection status
   if (!port.opened()) {
