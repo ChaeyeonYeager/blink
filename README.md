@@ -1,4 +1,4 @@
-# Arduino Blink with 3 Tasks using TaskScheduler + p5.js Web Serial Control
+# Arduino Blink with p5.js Web Serial Control
 
 ## Arduino
 - Task1: Turn the LED on periodically. The period is controlled by serial input.
