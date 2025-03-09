@@ -1,7 +1,9 @@
-# A Simple Blink Example using Two Tasks
+# A Simple Blink Example using Three Tasks
 - Use TaskScheduler Library
-  - Two independent tasks
-  - one for turning LED on at every 2 seconds
-  - the other for turning LED off at every 2 seconds with 200ms delay
+  - one for turning LED on at regular period (default = 2000ms)
+  - the other for turning LED off with 200ms delay
+  - the third one is used to adjust the period using the serial input
+
 - Timing Diagram
-  ![image](https://github.com/user-attachments/assets/87dca7f1-2211-4196-8b8d-77406aa3aeae)
+
+<img src="img/timing_diagram.png" alt="Timing Diagram" width="600">
