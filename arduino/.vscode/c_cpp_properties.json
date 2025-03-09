@@ -8,9 +8,9 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/bjc97/src/blink/include",
-                "C:/Users/bjc97/src/blink/src",
-                "C:/Users/bjc97/src/blink/.pio/libdeps/uno/TaskScheduler/src",
+                "C:/Users/bjc97/src/blink/arduino/include",
+                "C:/Users/bjc97/src/blink/arduino/src",
+                "C:/Users/bjc97/src/blink/arduino/.pio/libdeps/uno/TaskScheduler/src",
                 "C:/Users/bjc97/.platformio/packages/framework-arduino-avr/cores/arduino",
                 "C:/Users/bjc97/.platformio/packages/framework-arduino-avr/variants/standard",
                 "C:/Users/bjc97/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
@@ -23,9 +23,9 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/bjc97/src/blink/include",
-                    "C:/Users/bjc97/src/blink/src",
-                    "C:/Users/bjc97/src/blink/.pio/libdeps/uno/TaskScheduler/src",
+                    "C:/Users/bjc97/src/blink/arduino/include",
+                    "C:/Users/bjc97/src/blink/arduino/src",
+                    "C:/Users/bjc97/src/blink/arduino/.pio/libdeps/uno/TaskScheduler/src",
                     "C:/Users/bjc97/.platformio/packages/framework-arduino-avr/cores/arduino",
                     "C:/Users/bjc97/.platformio/packages/framework-arduino-avr/variants/standard",
                     "C:/Users/bjc97/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
