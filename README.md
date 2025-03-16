@@ -34,7 +34,7 @@ LED 깜빡임 상태 표시 (LED_STATE:) 반영
 
 아래는 본 프로젝트의 실제 회로 배선도입니다.
 
-![회로 구성도](blink/image.png)
+![회로 구성도](image.png)
 
 - 빨간 LED → D11
 - 노란 LED → D9
