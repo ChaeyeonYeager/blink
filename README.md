@@ -1,14 +1,18 @@
-# Arduino Blink with p5.js Web Serial Control
+이 프로젝트는 **여러 LED(빨강, 노랑, 파랑)**를 Task 기반으로 제어하며, 가변저항 밝기 조절, 특수 모드(비상/전체 깜빡임), 시리얼 명령 처리 기능이 포함된 시스템입니다.
 
-## Arduino
-- Task1: Turn the LED on periodically. The period is controlled by serial input.
-- Task2: Turn the LED off, initiated by Task1 after 200ms delay
-- Task3: Check the serial input and apply the value, if any, to the period
-- These three tasks reports their actions to the serial port.
+💡 주요 기능 요약
+TaskScheduler 활용: RED → YELLOW → BLUE → BLUE_BLINK → YELLOW → 반복
+가변저항 밝기 제어: 아날로그 입력값(01023)을 LED 밝기(0255)로 변환
+특수 모드
+Emergency Mode: RED LED 깜빡임
+All Blink Mode: 모든 LED 동시에 깜빡임
+System ON/OFF: 전체 Task 중지/재시작
+시리얼 명령 제어
+RED_TIME:1000 → RED Task 주기 변경
+YELLOW_TIME:500 → YELLOW Task 주기 변경
+BLUE_TIME:1500 → BLUE Task 주기 변경
+상태 시리얼 전송
+LED 상태 (LED:RED, LED:YELLOW 등)
+밝기 상태 (B:128)
+모드 상태 (B1: Emergency, B2: All Blink, B3: System OFF)
 
-## p5.js
-- Monitors the serial messages from Arduino via Web Serial interface.
-- The received messages are shown on the canvas.
-- LED ON detected in the message --> Red circle
-- LED OFF detected in the message --> Gray circle
-- Slider is used to control the period of LED blink by sending the value through serial port.
