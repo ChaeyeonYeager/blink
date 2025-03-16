@@ -16,3 +16,17 @@ LED 상태 (LED:RED, LED:YELLOW 등)
 밝기 상태 (B:128)
 모드 상태 (B1: Emergency, B2: All Blink, B3: System OFF)
 
+ p5.js 인터페이스: 아두이노 LED 상태 시각화 및 제어
+이 코드는 Arduino와 시리얼 통신으로 연결된 LED 상태를 웹 브라우저에서 시각화하고, 슬라이더를 통해 주기를 실시간으로 조정하는 p5.js 기반 UI입니다.
+
+📌 주요 기능
+시리얼 포트 연결 / 해제 버튼 제공
+LED 주기 슬라이더 제공 (RED, YELLOW)
+아두이노로부터 수신한 밝기(B:) 및 LED 상태(LED:) 시각화
+Emergency 모드 / All Blink 모드 / System OFF 상태 시각화 (B1, B2, B3)
+LED 깜빡임 상태 표시 (LED_STATE:) 반영
+가변저항 밝기 게이지 UI 제공
+
+
+
+
