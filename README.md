@@ -1,4 +1,6 @@
-유튜브: https://youtu.be/lmoJ5ljFtD8?feature=shared
+유튜브: https://youtu.be/YRiMoINWs1I
+(신호등 비전 컨트롤 설명 영상)
+(read me -> 제스처 기반 제어 기능 및 코드 흐름 설명 섹션부터 업데이트 완료)
 
 # 🔆 Arduino + p5.js 기반 인터랙티브 LED 제어 및 시각화 시스템
 
