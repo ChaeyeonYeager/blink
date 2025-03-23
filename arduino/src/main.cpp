@@ -1,3 +1,5 @@
+//신호등 비전 컨트롤 과제
+
 #include <Arduino.h>              // Arduino 기본 헤더, 필수 라이브러리
 #include <TaskScheduler.h>        // Task 기반 스케줄링을 위한 라이브러리
 #include <PinChangeInterrupt.h>   // 핀 변화 인터럽트를 지원하는 라이브러리
@@ -18,12 +20,12 @@ Scheduler runner;                 // 여러 Task를 관리하는 Task Scheduler 
 
 // --- 시스템 상태 변수 ---
 volatile bool isEmergencyMode = false; // Emergency 모드 상태 저장
-volatile bool isAllBlinkMode = false;  // 전체 깜빡임 모드 상태 저장
-volatile bool isSystemOn = true;       // 시스템 작동 상태 저장
+volatile bool isAllBlinkMode = false;    // 전체 깜빡임 모드 상태 저장
+volatile bool isSystemOn = true;         // 시스템 작동 상태 저장
 
 // --- LED 상태 열거형 선언 ---
 enum LEDState { NONE, RED, YELLOW, BLUE, RED_BLINK, BLUE_BLINK, ALL_BLINK }; 
-volatile LEDState currentState = NONE;   // 현재 어떤 LED 상태인지 저장
+volatile LEDState currentState = NONE;   // 현재 어떤 LED 상태인지 저장ㅁㅋ
 
 volatile bool blinkState = false;        // 깜빡임 ON/OFF 상태 토글 변수
 int currentBrightness = 0;               // 가변저항 값을 기반으로 계산한 LED 밝기
@@ -43,18 +45,18 @@ void redBlinkCallback(); void allBlinkCallback();  // 특수 모드 콜백 함�
 
 // --- Task 객체 생성 ---
 Task taskRed(2000, TASK_ONCE, NULL, &runner, false, onRedEnable, onRedDisable);        // RED 2초
-Task taskYellow(500, TASK_ONCE, NULL, &runner, false, onYellowEnable, onYellowDisable); // YELLOW 0.5초
-Task taskBlue(2000, TASK_ONCE, NULL, &runner, false, onBlueEnable, onBlueDisable);     // BLUE 2초
+Task taskYellow(500, TASK_ONCE, NULL, &runner, false, onYellowEnable, onYellowDisable);   // YELLOW 0.5초
+Task taskBlue(2000, TASK_ONCE, NULL, &runner, false, onBlueEnable, onBlueDisable);        // BLUE 2초
 Task taskBlueBlink(167, 6, blueBlinkCallback, &runner, false, onBlueBlinkEnable, onBlueBlinkDisable); // BLUE 3회 깜빡임
 Task taskYellow2(500, TASK_ONCE, NULL, &runner, false, onYellowEnable2, onYellowDisable2); // BLUE 깜빡임 후 YELLOW Task
-Task taskRedBlink(500, TASK_FOREVER, redBlinkCallback, &runner, false);                // Emergency 모드 RED 깜빡임
-Task taskAllBlink(500, TASK_FOREVER, allBlinkCallback, &runner, false);                // 전체 깜빡임 모드
+Task taskRedBlink(500, TASK_FOREVER, redBlinkCallback, &runner, false);                   // Emergency 모드 RED 깜빡임
+Task taskAllBlink(500, TASK_FOREVER, allBlinkCallback, &runner, false);                   // 전체 깜빡임 모드
 
 // ----------------------------------------------------------------------
 //                        인터럽트 서비스 루틴 (ISR)
 // ----------------------------------------------------------------------
 
-// Emergency 버튼을 누르면 Emergency 모드 ON/OFF 토글
+// Emergency 버튼을 누르면 Emergency 모드 토글
 void ISR_Emergency() {
   isEmergencyMode = !isEmergencyMode;  // 비상 모드 토글
   if (isEmergencyMode) {
@@ -221,16 +223,16 @@ void updateLEDBrightness() {
       analogWrite(RED_PIN, currentBrightness);        // RED LED에 밝기 적용
       break;
     case YELLOW:
-      analogWrite(YELLOW_PIN, currentBrightness);     // YELLOW LED에 밝기 적용
+      analogWrite(YELLOW_PIN, currentBrightness);       // YELLOW LED에 밝기 적용
       break;
     case BLUE:
-      analogWrite(BLUE_PIN, currentBrightness);       // BLUE LED에 밝기 적용
+      analogWrite(BLUE_PIN, currentBrightness);         // BLUE LED에 밝기 적용
       break;
     case RED_BLINK:
       analogWrite(RED_PIN, blinkState ? currentBrightness : 0);  // 깜빡임 상태면 밝기 출력, 아니면 OFF
       break;
     case BLUE_BLINK:
-      analogWrite(BLUE_PIN, blinkState ? currentBrightness : 0); // 마찬가지로 깜빡임 상태에 따라 출력
+      analogWrite(BLUE_PIN, blinkState ? currentBrightness : 0); // 깜빡임 상태에 따라 출력
       break;
     case ALL_BLINK:
       // 전체 LED 깜빡임 시 모두 동시에 ON/OFF
@@ -276,47 +278,123 @@ void updateLEDBrightness() {
 
   // --- 상태 인디케이터 메시지 전송 ---
   if (isEmergencyMode) Serial.println("B1");      // Emergency 상태
-  else if (isAllBlinkMode) Serial.println("B2");  // 전체 깜빡임 상태
-  else if (!isSystemOn) Serial.println("B3");     // 시스템 OFF 상태
+  else if (isAllBlinkMode) Serial.println("B2");   // 전체 깜빡임 상태
+  else if (!isSystemOn) Serial.println("B3");      // 시스템 OFF 상태
 }
 
 // ----- 시리얼 명령어 처리 함수 -----
+// p5.js에서 전달받는 명령을 처리하여 아두이노의 LED 동작 모드를 제어하는 함수
+// 수신되는 명령은 다음과 같다:
+// 1) "LOOP", "B1", "B2", "B3" : 모드 전환 명령
+// 2) "RED_TIME:1000" 등 : 각 LED의 주기를 설정하는 명령
 void processSerialCommands() {
-  if (Serial.available()) {
-    String cmd = Serial.readStringUntil('\n'); // 한 줄 수신
+  // 시리얼 버퍼에 읽을 데이터가 남아있을 동안 반복
+  while (Serial.available() > 0) {
+    // 한 줄(개행 전까지) 명령 수신
+    String cmd = Serial.readStringUntil('\n');
     cmd.trim(); // 앞뒤 공백 제거
-    if (cmd.length() == 0) return;
 
-    // 명령 포맷: COMMAND:VALUE
-    int separatorIndex = cmd.indexOf(':');
-    if (separatorIndex > 0) {
-      String commandName = cmd.substring(0, separatorIndex);      // 명령 이름
-      String commandValue = cmd.substring(separatorIndex + 1);    // 값
-      commandName.trim(); commandValue.trim();
+    // 빈 문자열이면 무시
+    if (cmd.length() == 0) continue;
 
+    // ─────────────────────────────
+    // [1] 모드 전환 명령 처리 (콜론이 없는 단일 명령어: LOOP, B1, B2, B3)
+    // ─────────────────────────────
+    if (cmd.indexOf(':') == -1) {
+      // [LOOP 모드] : 기본 동작으로 복귀 (RED Task만 실행)
+      if (cmd == "LOOP") {
+        isEmergencyMode = false;       // 비상 모드 해제
+        isAllBlinkMode = false;        // 전체 깜빡임 모드 해제
+        isSystemOn = true;             // 시스템 켜짐 상태
+        runner.disableAll();           // 모든 task 중지
+        taskRed.enableDelayed();       // RED LED 주기적 점등 재시작
+        Serial.println("LOOP mode activated");
+
+      // [B1 모드] : Emergency 모드 (RED LED 고정 켜짐)
+      } else if (cmd == "B1") {
+        isEmergencyMode = true;        // Emergency 모드 활성화
+        isAllBlinkMode = false;
+        isSystemOn = false;            // 시스템 off 상태로 간주
+        runner.disableAll();           // 기존 task 종료
+        currentState = RED;            // RED 상태 고정
+        Serial.println("Emergency mode (B1) activated");
+
+      // [B2 모드] : 전체 깜빡임 모드 (All Blink)
+      } else if (cmd == "B2") {
+        isEmergencyMode = false;
+        isAllBlinkMode = true;         // All Blink 모드 활성화
+        runner.disableAll();           // 기존 task 중지
+
+        // 모든 LED 끄기
+        analogWrite(RED_PIN, 0);
+        analogWrite(YELLOW_PIN, 0);
+        analogWrite(BLUE_PIN, 0);
+
+        blinkState = false;            // 초기 깜빡임 상태 OFF
+        currentState = ALL_BLINK;      // 현재 상태 설정
+        taskAllBlink.enable();         // All Blink Task 실행
+        Serial.println("All blink mode (B2) activated");
+
+      // [B3 모드] : 시스템 완전 종료 (모든 LED off)
+      } else if (cmd == "B3") {
+        isEmergencyMode = false;
+        isAllBlinkMode = false;
+        isSystemOn = false;            // 시스템 종료
+        runner.disableAll();           // 모든 task 중지
+
+        // 모든 LED 끄기
+        analogWrite(RED_PIN, 0);
+        analogWrite(YELLOW_PIN, 0);
+        analogWrite(BLUE_PIN, 0);
+
+        currentState = NONE;           // 상태 없음
+        Serial.println("System off mode (B3) activated");
+      }
+    }
+
+    // ─────────────────────────────
+    // [2] LED 주기 조절 명령 처리 (RED_TIME:1000 등)
+    // ─────────────────────────────
+    else {
+      // 콜론(:)을 기준으로 명령어 분리
+      int separatorIndex = cmd.indexOf(':');
+      String commandName = cmd.substring(0, separatorIndex);
+      String commandValue = cmd.substring(separatorIndex + 1);
+
+      // 앞뒤 공백 제거
+      commandName.trim();
+      commandValue.trim();
+
+      // [RED_TIME:x] → RED LED의 주기를 x(ms)로 설정
       if (commandName == "RED_TIME") {
-        long period = commandValue.toInt();           // 시간 값으로 변환
-        taskRed.setInterval(period);                  // RED Task 주기 설정
-        Serial.print("OK:RED_TIME:"); Serial.println(period);  // 확인 메시지 전송
-      }
-      else if (commandName == "YELLOW_TIME") {
+        long period = commandValue.toInt();        // 숫자로 변환
+        taskRed.setInterval(period);               // 주기 변경
+        Serial.print("OK:RED_TIME:");              // 확인 메시지 반환
+        Serial.println(period);
+
+      // [YELLOW_TIME:x] → YELLOW LED 주기 설정 (여러 task 동기화)
+      } else if (commandName == "YELLOW_TIME") {
         long period = commandValue.toInt();
-        taskYellow.setInterval(period);               // YELLOW Task 주기 변경
-        taskYellow2.setInterval(period);              // YELLOW2 Task도 동일하게 변경
-        Serial.print("OK:YELLOW_TIME:"); Serial.println(period);
-      }
-      else if (commandName == "BLUE_TIME") {
+        taskYellow.setInterval(period);
+        taskYellow2.setInterval(period);           // 추가 task도 동일 주기
+        Serial.print("OK:YELLOW_TIME:");
+        Serial.println(period);
+
+      // [BLUE_TIME:x] → BLUE LED 주기 설정
+      } else if (commandName == "BLUE_TIME") {
         long period = commandValue.toInt();
-        taskBlue.setInterval(period);                 // BLUE Task 주기 변경
-        Serial.print("OK:BLUE_TIME:"); Serial.println(period);
+        taskBlue.setInterval(period);
+        Serial.print("OK:BLUE_TIME:");
+        Serial.println(period);
       }
     }
   }
 }
 
+
 // ----- setup 함수 (최초 실행 시 1회만 호출됨) -----
 void setup() {
-  Serial.begin(9600);                          // 시리얼 통신 시작 (속도: 9600bps)
+  Serial.begin(9600);  // 시리얼 통신 시작 (9600bps)
   
   // LED 핀 출력 설정
   pinMode(RED_PIN, OUTPUT);
@@ -344,15 +422,15 @@ void setup() {
 
 // ----- loop 함수 (매 프레임 반복) -----
 void loop() {
-  updateLEDBrightness();     // 현재 상태에 따른 LED 밝기 출력
-  processSerialCommands();   // 시리얼 명령 수신 및 처리
+  updateLEDBrightness();    // 현재 상태에 따른 LED 밝기 출력
+  processSerialCommands();  // 시리얼 명령 수신 및 처리
   if (isSystemOn) {
-    runner.execute();        // Task Scheduler 실행 (예약된 Task 실행)
+    runner.execute();       // 예약된 Task 실행
   }
 }
 
 // ----- 가변저항 읽어서 밝기로 변환하는 함수 -----
 int getBrightness() {
-  int potValue = analogRead(POT_PIN);             // 아날로그 핀에서 0~1023 값 읽기
-  return map(potValue, 0, 1023, 0, 255);           // 0~255 범위로 변환하여 밝기값 리턴
+  int potValue = analogRead(POT_PIN);             // 0~1023 값 읽기
+  return map(potValue, 0, 1023, 0, 255);           // 0~255 범위로 변환
 }
